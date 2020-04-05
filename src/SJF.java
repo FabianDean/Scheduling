@@ -2,14 +2,13 @@
 /**
  * Fabian Flores
  * Date created: 03/27/2020
- * Last modified: 03/27/2020
+ * Last modified: 04/04/2020
  * Table output aided by code found here ->
  * https://www.logicbig.com/how-to/code-snippets/jcode-java-cmd-command-line-table.html
  */
 import java.io.*;
 import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class SJF {
     public SJF() {
@@ -29,7 +28,7 @@ public class SJF {
         return option;
     }
 
-    // bubble sort for our purposes
+    // bubble sort
     public static void sort(ArrayList<String> names, ArrayList<Integer> times) {
         String tmpName;
         int tmpTime;
@@ -47,7 +46,7 @@ public class SJF {
         }
     }
 
-    public static void sjfFile(File file) {
+    public static double sjf(File file, int n) {
         Scanner in;
         CommandLineTable table = new CommandLineTable();
         ArrayList<String> processNames = new ArrayList<>();
@@ -58,18 +57,24 @@ public class SJF {
             in = new Scanner(file);
             table.setShowVerticalLines(true);
             table.setHeaders("Job #", "Start time", "End time", "Job completion");
-
-            // save process names and their respective process times
-            while (in.hasNextLine()) {
-                processNames.add(in.nextLine());
-                processTimes.add(Integer.parseInt(in.nextLine()));
+            // based on the input data size selected by user
+            if (n == 0) {
+                // save process names and their respective process times
+                while (in.hasNextLine()) {
+                    processNames.add(in.nextLine());
+                    processTimes.add(Integer.parseInt(in.nextLine()));
+                }
+            } else {
+                for (int i = 0; i < n; i++) {
+                    processNames.add(in.nextLine());
+                    processTimes.add(Integer.parseInt(in.nextLine()));
+                }
             }
             for (int i = 0; i < processTimes.size(); i++) {
                 completedTimes.add(0);
             }
             // sorting based on shortest job
             sort(processNames, processTimes); // objects are pass-by-reference
-
             for (int i = 0; i < processNames.size(); i++) {
                 startTime = totalTime;
                 totalTime += processTimes.get(i);
@@ -77,42 +82,53 @@ public class SJF {
                 table.addRow(processNames.get(i), Integer.toString(startTime), Integer.toString(totalTime),
                         processNames.get(i) + " completed @ " + totalTime);
             }
-            table.print();
-            System.out.println("Average Turnaround Time");
-            System.out.print("= (");
+            if (n == 0) {
+                table.print();
+                System.out.println("Average Turnaround Time");
+                System.out.print("= (");
+            }
             sum = 0;
             for (int i = 0; i < completedTimes.size(); i++) {
                 sum += completedTimes.get(i);
-                System.out.print(completedTimes.get(i));
-                if (i < completedTimes.size() - 1)
-                    System.out.print(" + ");
-                else
-                    System.out.println(") / " + completedTimes.size());
+                if (n == 0) {
+                    System.out.print(completedTimes.get(i));
+                    if (i < completedTimes.size() - 1)
+                        System.out.print(" + ");
+                    else
+                        System.out.println(") / " + completedTimes.size());
+                }
             }
             double averageTurnaroundTime = (sum * 1.0) / processTimes.size();
-            System.out.printf("= %.2f ms\n", averageTurnaroundTime);
+            // do not print for simulation
+            if (n == 0)
+                System.out.printf("= %.2f ms\n", averageTurnaroundTime);
             in.close();
-        } catch (
-
-        Exception e) {
+            return averageTurnaroundTime;
+        } catch (Exception e) {
             System.out.println(e);
         }
+        return -1;
     }
 
     public static void simulate(int n) {
-        int runs = 20, maxJobLength = 20;
-        Random rand = new Random();
-        System.out.println(rand.nextInt(maxJobLength) + 1); // range[1, 20]
+        File file;
+        int runs = 20;
+        double sum = 0, averageTurnaroundTime;
+        for (int i = 0; i < runs; i++) {
+            file = new File("../input/jobs" + (i + 1) + ".txt");
+            sum += sjf(file, n);
+        }
+        averageTurnaroundTime = sum / runs;
+        System.out.println("Average Turnaround Time for " + runs + " trials with " + n + " jobs");
+        System.err.printf("= %.2f ms\n", averageTurnaroundTime);
     }
 
     public static void main(String[] args) {
         System.out.println("SJF Scheduling Algorithm\n");
-
         if (args.length > 0) {
-            sjfFile(new File(args[0]));
+            sjf(new File(args[0]), 0);
         } else {
             int option = menu();
-
             switch (option) {
                 case 1:
                     simulate(5);
@@ -124,7 +140,6 @@ public class SJF {
                     simulate(15);
                     break;
                 default:
-
                     break;
             }
         }
