@@ -2,7 +2,7 @@
 /**
  * Fabian Flores
  * Date created: 03/24/2020
- * Last modified: 04/05/2020
+ * Last modified: 04/07/2020
  * Table output aided by code found here ->
  * https://www.logicbig.com/how-to/code-snippets/jcode-java-cmd-command-line-table.html
  */
@@ -14,21 +14,29 @@ public class RR2 {
     public RR2() {
     }
 
+    /**
+     * Perform Round Robin (w/ burst time 2) scheduling algorithm
+     * 
+     * @param file method needs a file that contains the job names and lengths
+     * @param n    number of jobs in the file. Used for running the simulations. n
+     *             == 0 when a file is given as an argument in the program
+     */
     public static double rr2(File file, int n) {
         Scanner in;
         CommandLineTable table = new CommandLineTable();
         ArrayList<String> processNames = new ArrayList<>();
         ArrayList<Integer> processTimes = new ArrayList<>(); // preserve original process times
-        ArrayList<Integer> completedTimes = new ArrayList<>();
+        ArrayList<Integer> completedTimes = new ArrayList<>(); // will be used to process average turnaround time
         ArrayList<Integer> timeLeft = new ArrayList<>(); // copy of processTimes: calculations performed on this
-        int burstTime = 2, totalTime = 0, startTime, time, sum;
+        int burstTime = 2, totalTime = 0, startTime, time, sum; // time is assigned the remaining processing time for a
+                                                                // job each iteration (basically to stray from using
+                                                                // timeLeft.get(i) and clean up code)
         boolean done = false;
 
         try {
             in = new Scanner(file);
             table.setShowVerticalLines(true);
             table.setHeaders("Job #", "Start time", "End time", "Job completion");
-            // based on the input data size selected by user
             if (n == 0) {
                 // save process names and their respective process times
                 while (in.hasNextLine()) {
@@ -120,10 +128,18 @@ public class RR2 {
         return option;
     }
 
+    /**
+     * simulate the scheduling algorithm over 20 trials over the first n jobs each
+     * file
+     * 
+     * @param n the number of jobs to use in each input file (first 5, first 10, all
+     *          15)
+     */
     public static void simulate(int n) {
         File file;
         int runs = 20;
         double sum = 0, averageTurnaroundTime;
+        // loop through each input data file and run algorithm
         for (int i = 0; i < runs; i++) {
             file = new File("../input/jobs" + (i + 1) + ".txt");
             sum += rr2(file, n);
@@ -133,6 +149,13 @@ public class RR2 {
         System.err.printf("= %.2f ms\n", averageTurnaroundTime);
     }
 
+    /**
+     * To run over a specific file, simply given file path as argument when running
+     * program; otherwise, a menu will prompt with the number of jobs to run for the
+     * simulation over data sets in input folder
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         System.out.println("RR-2 Scheduling Algorithm");
         if (args.length > 0) {

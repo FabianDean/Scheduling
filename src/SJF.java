@@ -2,7 +2,7 @@
 /**
  * Fabian Flores
  * Date created: 03/27/2020
- * Last modified: 04/04/2020
+ * Last modified: 04/07/2020
  * Table output aided by code found here ->
  * https://www.logicbig.com/how-to/code-snippets/jcode-java-cmd-command-line-table.html
  */
@@ -28,7 +28,12 @@ public class SJF {
         return option;
     }
 
-    // bubble sort
+    /**
+     * Use bubble sort to sort the lists in ascending order based on times
+     * 
+     * @param names
+     * @param times
+     */
     public static void sort(ArrayList<String> names, ArrayList<Integer> times) {
         String tmpName;
         int tmpTime;
@@ -46,6 +51,12 @@ public class SJF {
         }
     }
 
+    /**
+     * Perform Shortest-Job-First scheduling algorithm
+     * 
+     * @param file method needs a file that contains the job names and lengths
+     * @param n    number of jobs in the file. Used for running the simulations
+     */
     public static double sjf(File file, int n) {
         Scanner in;
         CommandLineTable table = new CommandLineTable();
@@ -110,11 +121,19 @@ public class SJF {
         return -1;
     }
 
+    /**
+     * simulate the scheduling algorithm over 20 trials over the first n jobs each
+     * file
+     * 
+     * @param n the number of jobs to use in each input file (first 5, first 10, all
+     *          15)
+     */
     public static void simulate(int n) {
         File file;
         int runs = 20;
         double sum = 0, averageTurnaroundTime;
         for (int i = 0; i < runs; i++) {
+            // loop through each input data file and run algorithm
             file = new File("../input/jobs" + (i + 1) + ".txt");
             sum += sjf(file, n);
         }
@@ -123,6 +142,13 @@ public class SJF {
         System.err.printf("= %.2f ms\n", averageTurnaroundTime);
     }
 
+    /**
+     * To run over a specific file, simply given file path as argument when running
+     * program; otherwise, a menu will prompt with the number of jobs to run for the
+     * simulation over data sets in input folder
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         System.out.println("SJF Scheduling Algorithm\n");
         if (args.length > 0) {
